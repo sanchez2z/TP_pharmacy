@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Аптека</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-page="/Index">Аптека</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Catalog/Index">Каталог</a>
+                        </li>
+                        @if (User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Cart/Index">Корзина</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Orders/Index">Мои заказы</a></li>
+                        }
+                        @if (User.IsInRole("Manager"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Manager/Dashboard">Менеджер</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Manager/Products">Товары</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Manager/Pharmacies">Аптеки</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Manager/Stock">Остатки</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Manager/Employees">Сотрудники</a></li>
+                        }
+                        @if (User.IsInRole("Seller"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Seller/Dashboard">Продавец</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Seller/Orders">Заказы</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Seller/Sales">Продажи</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Seller/Prescriptions">Рецепты</a></li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item"><form method="post" asp-page="/Account/Logout"><button class="btn btn-link">Выйти</button></form></li>
+                        }
+                        else
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Account/Login">Вход</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Account/Register">Регистрация</a>
+                        </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @if (TempData["DatabaseError"] is string databaseError)
+            {
+                <p class="alert alert-danger">@databaseError</p>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Аптека
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

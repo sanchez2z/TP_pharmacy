@@ -1,0 +1,47 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Seller")]
+@model TP_pharmacy.Pages.Seller.DashboardModel
+@{
+    ViewData["Title"] = "Панель продавца";
+}
+
+<h1>Панель продавца</h1>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Новые заказы</h5>
+                <p class="display-4">@Model.NewOrdersCount</p>
+                <a asp-page="./Orders" class="btn btn-primary">Обработать</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Продажи за сегодня</h5>
+                <p class="display-4">@Model.TodaySalesCount</p>
+                <a asp-page="./Sales" class="btn btn-primary">Оформить продажу</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Рецепты</h5>
+                <p class="display-4">@Model.PendingPrescriptionsCount</p>
+                <a asp-page="./Prescriptions" class="btn btn-primary">Проверить</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Моя аптека</h5>
+                <p class="card-text">@Model.PharmacyAddress</p>
+            </div>
+        </div>
+    </div>
+</div>

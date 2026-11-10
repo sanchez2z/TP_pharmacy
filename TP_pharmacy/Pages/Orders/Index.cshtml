@@ -1,0 +1,9 @@
+@page
+@model TP_pharmacy.Pages.Orders.OrdersIndexModel
+@{ ViewData["Title"] = "Мои заказы"; }
+<h1>Мои заказы</h1>
+@if (Model.Orders.Count == 0) { <p>Заказов пока нет.</p> }
+@foreach (var o in Model.Orders)
+{
+    <p><a asp-page="./Details" asp-route-id="@o.Id">Заказ №@o.Id</a> — @o.CreatedAt.ToLocalTime().ToString("g"), @o.Pharmacy.Address, @o.Status, @o.TotalCost.ToString("N2") ₽</p>
+}

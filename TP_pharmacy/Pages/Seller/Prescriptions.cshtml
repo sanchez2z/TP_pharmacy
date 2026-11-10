@@ -1,0 +1,26 @@
+@page
+@model TP_pharmacy.Pages.Seller.PrescriptionsModel
+@{ ViewData["Title"] = "Рецепты"; }
+<h1>Проверка и внесение рецептов</h1><p>Данные вносятся продавцом с предъявленного покупателем документа.</p>
+<div asp-validation-summary="All" class="text-danger"></div>
+<form method="post" asp-page-handler="Save" class="card card-body mb-3">
+    <input asp-for="Input.Id" type="hidden" />
+    <label>Серийный номер <input asp-for="Input.SerialNumber" class="form-control" /></label>
+    <label>Препарат <select asp-for="Input.ProductId" class="form-select"><option value="">Выберите препарат</option>
+        @foreach (var p in Model.Products) { <option value="@p.Id">@p.Name</option> }
+    </select></label>
+    <label>Дата выдачи <input asp-for="Input.IssueDate" type="date" class="form-control" /></label>
+    <label>Действует до <input asp-for="Input.ExpiryDate" type="date" class="form-control" /></label>
+    <label>Медицинское учреждение <input asp-for="Input.MedicalInstitution" class="form-control" /></label>
+    <label>Врач <input asp-for="Input.DoctorName" class="form-control" /></label>
+    <label>Регулярность приёма <input asp-for="Input.Frequency" class="form-control" /></label>
+    <button class="btn btn-primary mt-2">Сохранить</button><a asp-page="./Prescriptions">Новый рецепт</a>
+</form>
+<table class="table"><thead><tr><th>ID</th><th>Номер</th><th>Препарат</th><th>Действует до</th><th></th></tr></thead><tbody>
+@foreach (var p in Model.Prescriptions)
+{
+    <tr><td>@p.Id</td><td>@p.SerialNumber</td><td>@p.Product.Name</td><td>@p.ExpiryDate.ToString("dd.MM.yyyy")</td><td>
+        <a asp-route-id="@p.Id">Изменить</a><form method="post" asp-page-handler="Delete" class="d-inline"><input name="id" type="hidden" value="@p.Id" /><button class="btn btn-sm btn-danger">Удалить</button></form>
+    </td></tr>
+}
+</tbody></table>
