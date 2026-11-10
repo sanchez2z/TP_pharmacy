@@ -1,0 +1,20 @@
+@page "{id:int}"
+@model TP_pharmacy.Pages.Catalog.DetailsModel
+@{ ViewData["Title"] = Model.Product.Name; }
+<h1>@Model.Product.Name</h1>
+<p>@Model.Product.Category</p><p>@Model.Product.Description</p><h2>@Model.Product.Price.ToString("N2") ₽</h2>
+<div asp-validation-summary="All" class="text-danger"></div>
+@if (Model.Product.RequiresPrescription)
+{
+    <p class="alert alert-warning">Отпускается только в аптеке по действительному рецепту.</p>
+}
+else
+{
+    <form method="post"><label>Количество <input asp-for="Quantity" min="1" class="form-control" /></label><button class="btn btn-primary">В корзину</button></form>
+}
+<h2 class="h4 mt-3">Наличие в аптеках</h2>
+@if (Model.Stocks.Count == 0) { <p>Нет в наличии.</p> }
+@foreach (var group in Model.Stocks.GroupBy(s => s.Pharmacy.Address))
+{
+    <p>@group.Key — @group.Sum(s => s.Quantity) шт.</p>
+}

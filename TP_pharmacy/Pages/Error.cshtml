@@ -1,0 +1,21 @@
+@page
+@model TP_pharmacy.Pages.ErrorModel
+@{
+    ViewData["Title"] = "Ошибка";
+}
+
+<h1 class="text-danger">Ошибка.</h1>
+<h2 class="text-danger">Произошла ошибка при обработке вашего запроса.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<h3>Что делать?</h3>
+<ul>
+    <li>Попробуйте обновить страницу</li>
+    <li>Вернитесь на <a asp-page="/Index">главную страницу</a></li>
+</ul>

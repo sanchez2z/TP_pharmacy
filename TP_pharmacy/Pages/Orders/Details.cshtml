@@ -1,0 +1,11 @@
+@page "{id:int}"
+@model TP_pharmacy.Pages.Orders.DetailsModel
+@{ ViewData["Title"] = $"Заказ №{Model.Order.Id}"; }
+<h1>Заказ №@Model.Order.Id</h1><div asp-validation-summary="All" class="text-danger"></div>
+<p>Статус: @Model.Order.Status</p><p>Аптека: @Model.Order.Pharmacy.Address</p><p>Создан: @Model.Order.CreatedAt.ToLocalTime().ToString("g")</p>
+@foreach (var i in Model.Order.OrderItems) { <p>@i.Product.Name × @i.Quantity — @i.Price.ToString("N2") ₽ за единицу</p> }
+<p>Списано бонусов: @Model.Order.BonusSpent</p><p>К оплате: @Model.Order.TotalCost.ToString("N2") ₽</p>
+@if (Model.Order.Status == TP_pharmacy.Models.OrderStatus.Pending)
+{
+    <form method="post" asp-page-handler="Cancel"><button class="btn btn-danger">Отменить заказ</button></form>
+}

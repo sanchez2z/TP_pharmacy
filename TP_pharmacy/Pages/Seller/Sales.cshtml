@@ -1,0 +1,21 @@
+@page
+@model TP_pharmacy.Pages.Seller.SalesModel
+@{ ViewData["Title"] = "Продажи"; }
+<h1>Оформление продажи</h1><div asp-validation-summary="All" class="text-danger"></div>
+@if (Model.Message != null) { <p class="alert alert-success">@Model.Message</p> }
+<form method="post" class="card card-body">
+    <label>Товар <select asp-for="ProductId" class="form-select"><option value="">Выберите товар</option>
+        @foreach (var p in Model.Products) { <option value="@p.Id">@p.Name — @p.Price.ToString("N2") ₽ @(p.RequiresPrescription ? "(рецептурный)" : "")</option> }
+    </select></label>
+    <label>Количество <input asp-for="Quantity" class="form-control" /></label>
+    <label>Телефон покупателя <input asp-for="CustomerPhone" class="form-control" /></label>
+    <label>ID проверенного рецепта (для рецептурного товара) <input asp-for="PrescriptionId" class="form-control" /></label>
+    <button class="btn btn-success mt-3">Оформить продажу</button>
+</form>
+<h2>Мои последние продажи</h2>
+@foreach (var p in Model.Purchases)
+{
+    <div class="card card-body mb-2"><p>№@p.Id — @p.PurchaseDate.ToLocalTime().ToString("g") — @p.TotalCost.ToString("N2") ₽</p>
+        @foreach (var i in p.PurchaseItems) { <p>@i.Product.Name × @i.Quantity</p> }
+    </div>
+}

@@ -1,0 +1,24 @@
+@page
+@model TP_pharmacy.Pages.Manager.EmployeesModel
+@{ ViewData["Title"] = "Сотрудники"; }
+<h1>Продавцы</h1>
+<div asp-validation-summary="All" class="text-danger"></div>
+<form method="post" asp-page-handler="Save" class="card card-body mb-3">
+    <input asp-for="Input.Id" type="hidden" />
+    <label>ФИО <input asp-for="Input.FullName" class="form-control" /></label>
+    <label>Email <input asp-for="Input.Email" class="form-control" /></label>
+    <label>Телефон <input asp-for="Input.PhoneNumber" class="form-control" /></label>
+    @if (Model.Input.Id == null) { <label>Пароль <input asp-for="Input.Password" class="form-control" /></label> }
+    <label>Аптека <select asp-for="Input.PharmacyId" class="form-select"><option value="">Выберите аптеку</option>
+        @foreach (var p in Model.Pharmacies) { <option value="@p.Id">@p.Address</option> }
+    </select></label>
+    <button class="btn btn-success mt-2">Сохранить</button><a asp-page="./Employees">Новый продавец</a>
+</form>
+<table class="table"><thead><tr><th>ФИО</th><th>Email</th><th>Аптека</th><th></th></tr></thead><tbody>
+@foreach (var e in Model.Employees)
+{
+    <tr><td>@e.User.FullName</td><td>@e.User.Email</td><td>@e.Pharmacy.Address</td><td><a asp-route-id="@e.UserId">Изменить</a>
+        <form method="post" asp-page-handler="Delete" class="d-inline"><input name="id" type="hidden" value="@e.UserId" /><button class="btn btn-sm btn-danger">Убрать из продавцов</button></form>
+    </td></tr>
+}
+</tbody></table>

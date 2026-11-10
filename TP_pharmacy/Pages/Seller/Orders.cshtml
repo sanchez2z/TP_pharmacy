@@ -1,0 +1,14 @@
+@page
+@model TP_pharmacy.Pages.Seller.OrdersModel
+@{ ViewData["Title"] = "Обработка заказов"; }
+<h1>Заказы моей аптеки</h1><div asp-validation-summary="All" class="text-danger"></div>
+@foreach (var order in Model.Orders)
+{
+    <section class="card card-body mb-3"><h2 class="h5">Заказ №@order.Id — @order.Status</h2>
+        @foreach (var item in order.OrderItems) { <p>@item.Product.Name × @item.Quantity</p> }
+        <p>@order.TotalCost.ToString("N2") ₽</p>
+        @if (order.Status == TP_pharmacy.Models.OrderStatus.Pending) { <form method="post" asp-page-handler="Process"><input name="orderId" value="@order.Id" type="hidden" /><button class="btn btn-primary">В обработку</button></form> }
+        @if (order.Status == TP_pharmacy.Models.OrderStatus.Processing) { <form method="post" asp-page-handler="Ready"><input name="orderId" value="@order.Id" type="hidden" /><button class="btn btn-primary">Готов к выдаче</button></form> }
+        @if (order.Status == TP_pharmacy.Models.OrderStatus.Ready) { <form method="post" asp-page-handler="Complete"><input name="orderId" value="@order.Id" type="hidden" /><button class="btn btn-success">Выдать</button></form> }
+    </section>
+}
