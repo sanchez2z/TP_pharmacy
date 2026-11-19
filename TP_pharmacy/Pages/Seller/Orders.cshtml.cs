@@ -25,6 +25,15 @@ public class OrdersModel(PharmacyDbContext context, OrderService service) : Page
     public Task<IActionResult> OnPostProcessAsync(int orderId) => AdvanceAsync(orderId, OrderStatus.Processing);
     public Task<IActionResult> OnPostReadyAsync(int orderId) => AdvanceAsync(orderId, OrderStatus.Ready);
     public Task<IActionResult> OnPostCompleteAsync(int orderId) => AdvanceAsync(orderId, OrderStatus.Completed);
+    public async Task<IActionResult> OnPostCancelAsync(int orderId)
+    {
+        try
+        {
+            if (!await service.CancelBySellerAsync(UserId, orderId)) return NotFound();
+            return RedirectToPage();
+        }
+        catch (BusinessException ex) { ModelState.AddModelError("", ex.Message); return await OnGetAsync(); }
+    }
     private async Task<IActionResult> AdvanceAsync(int id, OrderStatus status)
     {
         try

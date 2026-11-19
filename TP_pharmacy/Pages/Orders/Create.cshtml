@@ -7,11 +7,12 @@ else
 {
     @foreach (var item in Model.Cart.CartItems) { <p>@item.Product.Name × @item.Quantity — @((item.Product.Price * item.Quantity).ToString("N2")) ₽</p> }
     <p>Стоимость: @Model.TotalCost.ToString("N2") ₽. Баланс бонусов: @Model.BonusBalance.</p>
+    <p>1 бонус = 1 ₽. После выдачи заказа начислим 5% суммы, оплаченной без бонусов. При отмене списанные бонусы возвращаются.</p>
     <form method="post">
         <label>Аптека <select asp-for="PharmacyId" class="form-select"><option value="">Выберите аптеку</option>
             @foreach (var p in Model.Pharmacies) { <option value="@p.Id">@p.Address</option> }
         </select></label>
-        <label>Списать бонусы (не более 50% суммы) <input asp-for="BonusAmount" class="form-control" min="0" /></label>
+        <label>Списать бонусы (не более 50% суммы) <input asp-for="BonusAmount" class="form-control" min="0" max="@Math.Min(Model.BonusBalance, Math.Floor(Model.TotalCost / 2))" /></label>
         <button class="btn btn-success mt-3">Подтвердить заказ</button>
     </form>
 }

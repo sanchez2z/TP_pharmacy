@@ -1,0 +1,47 @@
+@model TP_pharmacy.Pages.Catalog.CatalogIndexModel
+<h1>Каталог товаров</h1>
+<div asp-validation-summary="All" class="alert alert-danger"></div>
+@if (Model.CartMessage != null) { <p role="status" class="alert alert-success">@Model.CartMessage <a asp-page="/Cart/Index">Перейти в корзину</a></p> }
+<form method="get" class="row g-2 align-items-center mb-4">
+    <div class="col-12 col-md-4"><input name="searchTerm" value="@Model.SearchTerm" placeholder="Поиск по названию" aria-label="Поиск по названию" class="form-control" /></div>
+    <div class="col-12 col-md-3"><select name="category" aria-label="Категория" class="form-select"><option value="">Все категории</option>
+        @foreach (var c in Model.Categories) { <option value="@c" selected="@(c == Model.CurrentCategory)">@c</option> }
+    </select></div>
+    <div class="col-12 col-md-3"><label><input type="checkbox" name="prescriptionOnly" value="true" checked="@Model.PrescriptionOnly" /> Только рецептурные</label></div>
+    <div class="col-12 col-md-2"><button class="btn btn-primary w-100">Найти</button></div>
+</form>
+@if (Model.Products.Count == 0) { <p>Товары не найдены.</p> }
+<div class="row g-3">
+@foreach (var p in Model.Products)
+{
+    var available = Model.AvailableQuantities.GetValueOrDefault(p.Id);
+    <div class="col-12 col-md-6 col-lg-4"><article class="card card-body h-100 product-card">
+        <h2 class="h5"><a asp-page="/Catalog/Details" asp-route-id="@p.Id">@p.Name</a></h2>
+        <p class="text-muted">@p.Category</p><p class="h4">@p.Price.ToString("N2") ₽</p>
+        @if (p.RequiresPrescription) { <p class="text-warning">Только по рецепту, покупка в аптеке</p> }
+        else if (available == 0)
+        {
+            <p class="text-muted">Нет в наличии</p>
+            @if (Model.CartProductIds.Contains(p.Id)) { <a asp-page="/Cart/Index" class="btn btn-outline-success">В корзине</a> }
+        }
+        else if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Customer")) { <p class="text-muted">Покупки доступны в учётной записи покупателя.</p> }
+        else
+        {
+            <form method="post" asp-page-handler="AddToCart" class="mt-auto" data-cart-form data-guest="@(User.Identity?.IsAuthenticated != true ? "true" : "false")">
+                <input type="hidden" name="productId" value="@p.Id" />
+                <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                <input type="hidden" name="category" value="@Model.CurrentCategory" />
+                <input type="hidden" name="prescriptionOnly" value="@Model.PrescriptionOnly.ToString().ToLowerInvariant()" />
+                <label for="quantity-@p.Id" class="form-label">Количество</label>
+                <div class="input-group mb-2" data-quantity-control>
+                    <button type="button" class="btn btn-outline-secondary" data-quantity-step="-1" aria-label="Уменьшить количество">−</button>
+                    <input id="quantity-@p.Id" type="number" name="quantity" value="1" min="1" max="@Math.Min(available, 10000)" step="1" required class="form-control text-center" />
+                    <button type="button" class="btn btn-outline-secondary" data-quantity-step="1" aria-label="Увеличить количество">+</button>
+                </div>
+                <button class="btn btn-success w-100">@(Model.CartProductIds.Contains(p.Id) ? "В корзине" : "В корзину")</button>
+            </form>
+        }
+        <a asp-page="/Catalog/Details" asp-route-id="@p.Id" class="btn btn-outline-primary mt-2">Подробнее</a>
+    </article></div>
+}
+</div>

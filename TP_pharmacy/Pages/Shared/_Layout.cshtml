@@ -9,22 +9,17 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-xl navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-page="/Index">Аптека</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-page="/Catalog/Index">Каталог</a>
+                            <a class="nav-link text-dark" asp-page="/Index">Каталог</a>
                         </li>
-                        @if (User.IsInRole("Customer"))
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-page="/Cart/Index">Корзина</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-page="/Orders/Index">Мои заказы</a></li>
-                        }
                         @if (User.IsInRole("Manager"))
                         {
                             <li class="nav-item"><a class="nav-link" asp-page="/Manager/Dashboard">Менеджер</a></li>
@@ -38,12 +33,22 @@
                             <li class="nav-item"><a class="nav-link" asp-page="/Seller/Dashboard">Продавец</a></li>
                             <li class="nav-item"><a class="nav-link" asp-page="/Seller/Orders">Заказы</a></li>
                             <li class="nav-item"><a class="nav-link" asp-page="/Seller/Sales">Продажи</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-page="/Seller/Stock">Остатки</a></li>
                             <li class="nav-item"><a class="nav-link" asp-page="/Seller/Prescriptions">Рецепты</a></li>
                         }
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav ms-auto align-items-xl-center gap-xl-2 account-navigation">
+                        @if (User.Identity?.IsAuthenticated != true)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Cart/Index" data-guest-cart>Корзина</a></li>
+                        }
+                        else if (User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Cart/Index">Корзина</a></li>
+                        }
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Account/Profile">Профиль</a></li>
                             <li class="nav-item"><form method="post" asp-page="/Account/Logout"><button class="btn btn-link">Выйти</button></form></li>
                         }
                         else
@@ -69,6 +74,21 @@
             @RenderBody()
         </main>
     </div>
+
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        var returnUrl = Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString;
+        <div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <div class="modal-header"><h2 class="modal-title fs-5" id="authRequiredTitle">Войдите, чтобы добавить товар</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button></div>
+                <div class="modal-body"><p>Корзина доступна зарегистрированным покупателям. Войдите в свою учётную запись или создайте новую.</p></div>
+                <div class="modal-footer">
+                    <a asp-page="/Account/Login" asp-route-returnUrl="@returnUrl" class="btn btn-primary">Войти</a>
+                    <a asp-page="/Account/Register" asp-route-returnUrl="@returnUrl" class="btn btn-outline-primary">Зарегистрироваться</a>
+                </div>
+            </div></div>
+        </div>
+    }
 
     <footer class="border-top footer text-muted">
         <div class="container">

@@ -9,16 +9,24 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .footer {
-  position: absolute;
-  bottom: 0;
+  margin-top: auto;
   width: 100%;
   white-space: nowrap;
   line-height: 60px;
 }
+
+main { padding-bottom: 2rem; }
+.product-card { margin-bottom: 0; }
+.product-card h2 a { text-decoration: none; }
+.account-navigation { flex-shrink: 0; }
+.validation-summary-valid { display: none; }
+[data-quantity-control] input { min-width: 4rem; }
 
 .navbar-brand {
   font-weight: bold;

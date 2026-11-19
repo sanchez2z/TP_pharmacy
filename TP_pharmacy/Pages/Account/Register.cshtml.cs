@@ -25,6 +25,8 @@ public class RegisterModel : PageModel
 
     [BindProperty]
     public InputModel Input { get; set; } = new();
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
 
     public class InputModel
     {
@@ -88,6 +90,6 @@ public class RegisterModel : PageModel
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();
         await _signInManager.SignInAsync(user, isPersistent: false);
-        return RedirectToPage("/Catalog/Index");
+        return Url.IsLocalUrl(ReturnUrl) ? LocalRedirect(ReturnUrl!) : RedirectToPage("/Index");
     }
 }

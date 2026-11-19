@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages().AddMvcOptions(options => options.Filters.Add<DatabaseExceptionFilter>());
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CartService>();
 
 builder.Services.AddDbContext<PharmacyDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -51,6 +52,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStatusCodePagesWithReExecute("/Status/{0}");
 app.UseStaticFiles();
 
 app.UseRouting();

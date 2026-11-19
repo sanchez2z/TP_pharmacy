@@ -17,18 +17,23 @@ public class SalesModel(PharmacyDbContext context, OrderService orders) : PageMo
     [BindProperty, Range(1, int.MaxValue)] public int ProductId { get; set; }
     [BindProperty, Range(1, 10000)] public int Quantity { get; set; } = 1;
     [BindProperty] public int? PrescriptionId { get; set; }
+    [BindProperty, Range(0, int.MaxValue)] public int BonusAmount { get; set; }
     public List<Product> Products { get; set; } = new();
     public List<Purchase> Purchases { get; set; } = new();
     [TempData] public string? Message { get; set; }
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-    public async Task OnGetAsync() => await LoadAsync();
+    public async Task OnGetAsync(int? productId)
+    {
+        if (productId.HasValue) ProductId = productId.Value;
+        await LoadAsync();
+    }
     public async Task<IActionResult> OnPostAsync()
     {
         if (ModelState.IsValid)
         {
             try
             {
-                var purchase = await orders.SellAsync(UserId, ProductId, Quantity, CustomerPhone, PrescriptionId);
+                var purchase = await orders.SellAsync(UserId, ProductId, Quantity, CustomerPhone, PrescriptionId, BonusAmount);
                 Message = $"Продажа №{purchase.Id} сохранена."; return RedirectToPage();
             }
             catch (BusinessException ex) { ModelState.AddModelError("", ex.Message); }

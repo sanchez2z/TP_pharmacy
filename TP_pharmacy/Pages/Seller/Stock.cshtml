@@ -1,0 +1,20 @@
+@page
+@model TP_pharmacy.Pages.Seller.StockModel
+@{ ViewData["Title"] = "Остатки моей аптеки"; }
+<h1>Остатки моей аптеки</h1>
+<p>@Model.PharmacyAddress</p>
+<p class="text-muted">В наличии указаны свободные непросроченные остатки, без товаров, уже зарезервированных интернет-заказами.</p>
+<form method="get" class="input-group mb-3"><input name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Название товара" aria-label="Название товара" /><button class="btn btn-primary">Найти</button></form>
+@if (Model.Rows.Count == 0) { <p>Товары не найдены.</p> }
+else
+{
+    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Товар</th><th>Категория</th><th>Цена</th><th>Рецептурность</th><th>В наличии</th><th>Просрочено</th><th></th></tr></thead><tbody>
+    @foreach (var row in Model.Rows)
+    {
+        <tr><td>@row.Name</td><td>@row.Category</td><td>@row.Price.ToString("N2") ₽</td><td>@(row.RequiresPrescription ? "По рецепту" : "Без рецепта")</td><td>@row.Available шт.</td><td>@row.Expired шт.</td><td>
+            @if (row.Available > 0) { <a asp-page="./Sales" asp-route-productId="@row.ProductId" class="btn btn-sm btn-success">Оформить продажу</a> }
+            else { <span class="text-muted">Нет в наличии</span> }
+        </td></tr>
+    }
+    </tbody></table></div>
+}

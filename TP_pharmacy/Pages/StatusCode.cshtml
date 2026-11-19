@@ -1,0 +1,9 @@
+@page "/Status/{code:int}"
+@model TP_pharmacy.Pages.StatusCodeModel
+@{ ViewData["Title"] = Model.Code switch { 404 => "Страница не найдена", 403 => "Доступ запрещён", _ => "Не удалось выполнить запрос" }; }
+<section class="text-center py-5">
+    <p class="display-1">@Model.Code</p>
+    <h1>@ViewData["Title"]</h1>
+    <p>@(Model.Code switch { 404 => "Возможно, адрес указан неверно или эта запись больше не существует.", 403 => "У вашей учётной записи нет доступа к этой странице.", _ => "Проверьте введённые данные или повторите попытку позже." })</p>
+    <a asp-page="/Index" class="btn btn-primary">Вернуться на главную</a>
+</section>

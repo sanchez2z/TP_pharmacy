@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using TP_pharmacy.Data;
 using TP_pharmacy.Models;
+using TP_pharmacy.Services;
 
 namespace TP_pharmacy.Pages.Catalog;
 
-public class DetailsModel(PharmacyDbContext context) : PageModel
+public class DetailsModel(PharmacyDbContext context, CartService cartService) : PageModel
 {
     public Product Product { get; set; } = null!;
     public List<Stock> Stocks { get; set; } = new();
@@ -20,19 +21,12 @@ public class DetailsModel(PharmacyDbContext context) : PageModel
         if (!await LoadAsync(id)) return NotFound();
         if (Product.RequiresPrescription) ModelState.AddModelError("", "Рецептурные препараты оформляет продавец в аптеке при предъявлении рецепта.");
         if (!ModelState.IsValid) return Page();
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var cart = await context.Carts.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CustomerId == userId);
-        if (cart == null) return NotFound();
-        var item = cart.CartItems.FirstOrDefault(i => i.ProductId == id);
-        var totalQuantity = (item?.Quantity ?? 0) + Quantity;
-        var available = Stocks.GroupBy(s => s.PharmacyId).Select(g => g.Sum(s => s.Quantity)).DefaultIfEmpty(0).Max();
-        if (totalQuantity > available)
+        try
         {
-            ModelState.AddModelError("", "Недостаточно товара в одной аптеке для выбранного количества."); return Page();
+            await cartService.AddAsync(User.FindFirstValue(ClaimTypes.NameIdentifier)!, id, Quantity);
+            return RedirectToPage("/Cart/Index");
         }
-        if (item == null) cart.CartItems.Add(new CartItem { ProductId = id, Quantity = Quantity });
-        else item.Quantity = totalQuantity;
-        await context.SaveChangesAsync(); return RedirectToPage("/Cart/Index");
+        catch (BusinessException ex) { ModelState.AddModelError("", ex.Message); return Page(); }
     }
     private async Task<bool> LoadAsync(int id)
     {

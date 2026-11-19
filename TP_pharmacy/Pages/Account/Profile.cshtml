@@ -1,0 +1,52 @@
+@page
+@model TP_pharmacy.Pages.Account.ProfileModel
+@{ ViewData["Title"] = "Мой профиль"; }
+<h1>Мой профиль</h1>
+<div class="row g-3 mb-4">
+    <section class="col-md-7"><div class="card card-body h-100">
+        <h2 class="h4">Личные сведения</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-4">ФИО</dt><dd class="col-sm-8">@Model.Account.FullName</dd>
+            <dt class="col-sm-4">Email</dt><dd class="col-sm-8">@Model.Account.Email</dd>
+            <dt class="col-sm-4">Телефон</dt><dd class="col-sm-8">@(Model.Account.PhoneNumber ?? "Не указан")</dd>
+            <dt class="col-sm-4">Регистрация</dt><dd class="col-sm-8">@Model.Account.RegistrationDate.ToLocalTime().ToString("dd.MM.yyyy")</dd>
+        </dl>
+    </div></section>
+    <section class="col-md-5"><div class="card card-body h-100">
+        <h2 class="h4">Бонусная карта</h2>
+        @if (Model.Card == null) { <p>К этой учётной записи бонусная карта не привязана.</p> }
+        else
+        {
+            <p>Карта №@Model.Card.Id</p><p class="display-6">@Model.Card.BonusBalance <span class="fs-5">бонусов</span></p>
+            <p class="text-muted">1 бонус = 1 ₽. Можно оплатить до 50% стоимости. После завершения покупки начисляется 5% оплаченной суммы (с округлением вниз).</p>
+        }
+    </div></section>
+</div>
+<section class="mb-4"><h2 class="h4">История заказов</h2>
+@if (Model.Orders.Count == 0) { <p>Вы пока не оформляли заказы. <a asp-page="/Index">Перейти в каталог</a></p> }
+@foreach (var order in Model.Orders)
+{
+    <article class="card card-body mb-3">
+        <div class="d-flex flex-wrap justify-content-between gap-2"><h3 class="h5"><a asp-page="/Orders/Details" asp-route-id="@order.Id">Заказ №@order.Id</a></h3><span class="badge bg-secondary">@order.Status.ToRussian()</span></div>
+        <p class="text-muted">@order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") · @order.Pharmacy.Address</p>
+        <ul>@foreach (var item in order.OrderItems) { <li>@item.Product.Name × @item.Quantity — @((item.Price * item.Quantity).ToString("N2")) ₽</li> }</ul>
+        <p class="mb-0">Итого: <strong>@order.TotalCost.ToString("N2") ₽</strong> · Списано бонусов: @order.BonusSpent</p>
+        @if (order.Status.CanCancel()) { <a asp-page="/Orders/Details" asp-route-id="@order.Id" class="mt-2">Открыть заказ / отменить</a> }
+    </article>
+}
+</section>
+@if (Model.Card != null)
+{
+    <section><h2 class="h4">Последние операции с бонусами</h2>
+    @if (Model.Transactions.Count == 0) { <p>Операций пока нет.</p> }
+    else
+    {
+        <div class="table-responsive"><table class="table"><thead><tr><th>Дата</th><th>Операция</th><th>Бонусы</th></tr></thead><tbody>
+        @foreach (var t in Model.Transactions)
+        {
+            <tr><td>@t.TransactionDate.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td><td>@t.Description</td><td>@(t.Type == TP_pharmacy.Models.TransactionType.Spent ? "−" : "+")@t.Amount</td></tr>
+        }
+        </tbody></table></div>
+    }
+    </section>
+}

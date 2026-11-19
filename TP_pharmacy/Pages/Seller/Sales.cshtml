@@ -2,6 +2,7 @@
 @model TP_pharmacy.Pages.Seller.SalesModel
 @{ ViewData["Title"] = "Продажи"; }
 <h1>Оформление продажи</h1><div asp-validation-summary="All" class="text-danger"></div>
+<p><a asp-page="./Stock">Посмотреть остатки, цены и рецептурность</a></p>
 @if (Model.Message != null) { <p class="alert alert-success">@Model.Message</p> }
 <form method="post" class="card card-body">
     <label>Товар <select asp-for="ProductId" class="form-select"><option value="">Выберите товар</option>
@@ -9,6 +10,8 @@
     </select></label>
     <label>Количество <input asp-for="Quantity" class="form-control" /></label>
     <label>Телефон покупателя <input asp-for="CustomerPhone" class="form-control" /></label>
+    <p class="text-muted">По телефону найдём бонусную карту. Списание — до 50%, начисление — 5% фактически оплаченной суммы после сохранения продажи.</p>
+    <label>Списать бонусы <input asp-for="BonusAmount" class="form-control" min="0" /></label>
     <label>ID проверенного рецепта (для рецептурного товара) <input asp-for="PrescriptionId" class="form-control" /></label>
     <button class="btn btn-success mt-3">Оформить продажу</button>
 </form>

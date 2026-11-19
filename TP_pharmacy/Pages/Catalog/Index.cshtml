@@ -1,22 +1,4 @@
 @page
 @model TP_pharmacy.Pages.Catalog.CatalogIndexModel
 @{ ViewData["Title"] = "Каталог"; }
-<h1>Каталог товаров</h1>
-<form method="get" class="row g-2 mb-3">
-    <div class="col"><input name="searchTerm" value="@Model.SearchTerm" placeholder="Поиск по названию" class="form-control" /></div>
-    <div class="col"><select name="category" class="form-select"><option value="">Все категории</option>
-        @foreach (var c in Model.Categories) { <option value="@c" selected="@(c == Model.CurrentCategory)">@c</option> }
-    </select></div>
-    <div class="col"><label><input type="checkbox" name="prescriptionOnly" value="true" checked="@Model.PrescriptionOnly" /> Только рецептурные</label></div>
-    <div class="col"><button class="btn btn-primary">Найти</button></div>
-</form>
-@if (Model.Products.Count == 0) { <p>Товары не найдены.</p> }
-<div class="row">
-@foreach (var p in Model.Products)
-{
-    <div class="col-md-4"><div class="card card-body"><h2 class="h5">@p.Name</h2><p>@p.Category</p><p>@p.Price.ToString("N2") ₽</p>
-        @if (p.RequiresPrescription) { <p class="text-warning">Только по рецепту, покупка в аптеке</p> }
-        <a asp-page="./Details" asp-route-id="@p.Id" class="btn btn-primary">Подробнее</a>
-    </div></div>
-}
-</div>
+<partial name="_Catalog" model="Model" />
