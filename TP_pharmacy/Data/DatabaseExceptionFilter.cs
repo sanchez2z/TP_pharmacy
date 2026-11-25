@@ -19,7 +19,11 @@ public class DatabaseExceptionFilter(ITempDataDictionaryFactory tempDataFactory,
             _ => null
         };
         if (message == null) return;
-        logger.LogWarning("Database write conflict: {ExceptionType}", context.Exception.GetType().Name);
+        logger.LogWarning(
+            context.Exception,
+            "Конфликт при изменении данных. Path={Path}, ExceptionType={ExceptionType}",
+            context.HttpContext.Request.Path,
+            context.Exception.GetType().Name);
         tempDataFactory.GetTempData(context.HttpContext)["DatabaseError"] = message;
         context.Result = new LocalRedirectResult(context.HttpContext.Request.PathBase + context.HttpContext.Request.Path);
         context.ExceptionHandled = true;

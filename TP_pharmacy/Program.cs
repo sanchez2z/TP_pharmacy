@@ -6,6 +6,10 @@ using TP_pharmacy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ДОБАВЛЕНИЕ ЛОГГЕРА
+builder.Logging.ClearProviders();
+builder.Logging.AddLog4Net("log4net.config");
+
 builder.Services.AddRazorPages().AddMvcOptions(options => options.Filters.Add<DatabaseExceptionFilter>());
 builder.Services.AddScoped<OrderService>();
 

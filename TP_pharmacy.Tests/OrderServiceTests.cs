@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using TP_pharmacy.Data;
 using TP_pharmacy.Models;
 using TP_pharmacy.Services;
 
 namespace TP_pharmacy.Tests;
+
+//TODO: починить юнит-тесты
 
 [TestFixture]
 [NonParallelizable]

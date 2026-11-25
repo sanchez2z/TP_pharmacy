@@ -1,5 +1,6 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
 using TP_pharmacy.Data;
 using TP_pharmacy.Models;
@@ -8,8 +9,10 @@ namespace TP_pharmacy.Services;
 
 public class BusinessException(string message) : Exception(message);
 
-public class OrderService(PharmacyDbContext db)
+public class OrderService(PharmacyDbContext db, ILogger<OrderService>? logger = null)
 {
+    private ILogger<OrderService> Logger => logger ?? NullLogger<OrderService>.Instance;
+
     private async Task<T> WriteAsync<T>(Func<Task<T>> action)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
@@ -31,6 +34,8 @@ public class OrderService(PharmacyDbContext db)
 
     public Task<Order> CreateAsync(string customerId, int pharmacyId, int bonusAmount) => WriteAsync(async () =>
     {
+        Logger.LogInformation("Начато создание заказа. CustomerId = {CustomerId}, PharmacyId = {PharmacyId}", customerId, pharmacyId);
+        
         var cart = await db.Carts.Include(c => c.CartItems).ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(c => c.CustomerId == customerId);
         if (cart == null || cart.CartItems.Count == 0) throw new BusinessException("Корзина пуста.");
@@ -56,11 +61,23 @@ public class OrderService(PharmacyDbContext db)
                 Type = TransactionType.Spent, Description = "Оплата интернет-заказа" });
         }
         db.Orders.Add(order); db.CartItems.RemoveRange(cart.CartItems);
+        
+        Logger.LogInformation(
+            "Заказ успешно создан. OrderId={OrderId}, CustomerId={CustomerId}, TotalCost={TotalCost}",
+            order.Id,
+            customerId,
+            order.TotalCost);
+        
         return order;
     });
 
     public Task<bool> CancelAsync(string customerId, int orderId) => WriteAsync(async () =>
     {
+        Logger.LogInformation(
+            "Начата отмена заказа. CustomerId={CustomerId}, OrderId={OrderId}",
+            customerId,
+            orderId);
+        
         var order = await db.Orders.Include(o => o.ReservedStocks).ThenInclude(s => s.Stock)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.CustomerId == customerId);
         if (order == null) return false;
@@ -75,25 +92,57 @@ public class OrderService(PharmacyDbContext db)
                 Type = TransactionType.Earned, Description = $"Возврат бонусов за отменённый заказ №{order.Id}" });
         }
         order.Status = OrderStatus.Cancelled;
+        
+        Logger.LogInformation(
+            "Заказ отменён. OrderId={OrderId}, Возвращено бонусов={BonusAmount}",
+            order.Id,
+            order.BonusSpent);
+        
         return true;
     });
 
     public Task<bool> AdvanceAsync(string sellerId, int orderId, OrderStatus next) => WriteAsync(async () =>
     {
+        Logger.LogInformation(
+            "Изменение статуса заказа. SellerId={SellerId}, OrderId={OrderId}, NewStatus={NewStatus}",
+            sellerId,
+            orderId,
+            next);
+        
         var seller = await db.Sellers.FindAsync(sellerId);
         if (seller == null) return false;
         var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId && o.PharmacyId == seller.PharmacyId);
         if (order == null) return false;
         var allowed = (order.Status, next) is (OrderStatus.Pending, OrderStatus.Processing) or
             (OrderStatus.Processing, OrderStatus.Ready) or (OrderStatus.Ready, OrderStatus.Completed);
-        if (!allowed) throw new BusinessException("Недопустимый переход статуса заказа.");
+        if (!allowed)
+        {
+            Logger.LogWarning(
+                "Отклонён недопустимый переход статуса. OrderId={OrderId}, CurrentStatus={CurrentStatus}, RequestedStatus={RequestedStatus}",
+                order.Id,
+                order.Status,
+                next);
+            throw new BusinessException("Недопустимый переход статуса заказа.");
+        }
         order.Status = next;
         if (next == OrderStatus.Completed) order.CompletedAt = DateTime.UtcNow;
+        
+        Logger.LogInformation(
+            "Статус заказа изменён. OrderId={OrderId}, Status={Status}",
+            order.Id,
+            order.Status);
+        
         return true;
     });
 
     public Task<Purchase> SellAsync(string sellerId, int productId, int quantity, string? phone, int? prescriptionId) => WriteAsync(async () =>
     {
+        Logger.LogInformation(
+            "Начата продажа товара. SellerId={SellerId}, ProductId={ProductId}, Quantity={Quantity}",
+            sellerId,
+            productId,
+            quantity);
+        
         var seller = await db.Sellers.FindAsync(sellerId) ?? throw new BusinessException("Продавец не найден.");
         var product = await db.Products.FindAsync(productId) ?? throw new BusinessException("Товар не найден.");
         if (quantity < 1 || quantity > 10000) throw new BusinessException("Количество должно быть от 1 до 10000.");
@@ -113,6 +162,13 @@ public class OrderService(PharmacyDbContext db)
         var purchase = new Purchase { SellerId = sellerId, CustomerPhoneNumber = phone, TotalCost = product.Price * quantity };
         purchase.PurchaseItems.Add(new PurchaseItem { ProductId = productId, Quantity = quantity, Price = product.Price });
         db.Purchases.Add(purchase);
+        
+        Logger.LogInformation(
+            "Продажа завершена. PurchaseId={PurchaseId}, ProductId={ProductId}, TotalCost={TotalCost}",
+            purchase.Id,
+            productId,
+            purchase.TotalCost);
+        
         return purchase;
     });
 

@@ -43,7 +43,41 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Отчётность</h5>
-                <p class="text-muted">Статистика продаж и прибыли будет доступна после подключения к базе данных</p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <strong>Выручка</strong>
+                        <div class="fs-4">@Model.Revenue.ToString("N2") ₽</div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Продано единиц</strong>
+                        <div class="fs-4">@Model.SoldItems</div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Средний чек</strong>
+                        <div class="fs-4">@Model.AverageCheck.ToString("N2") ₽</div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Товаров с малым остатком</strong>
+                        <div class="fs-4">@Model.LowStockProductsCount</div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <p class="mb-0">
+                    <strong>Самый продаваемый товар:</strong>
+                    @if (Model.BestSellingProduct is null)
+                    {
+                        <span>данных о продажах пока нет</span>
+                    }
+                    else
+                    {
+                        <span>
+                            @Model.BestSellingProduct.ProductName
+                            (@Model.BestSellingProduct.Quantity шт.)
+                        </span>
+                    }
+                </p>
             </div>
         </div>
     </div>
